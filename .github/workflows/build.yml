@@ -15,7 +15,7 @@ env:
 jobs:
   build:
     runs-on: windows-latest
-    timeout-minutes: 20 # محدودیت زمانی برای کل job
+    timeout-minutes: 20
 
     steps:
       # Step 1: Checkout the repository
@@ -48,14 +48,16 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: package-lock.json # صراحتاً به package-lock.json اشاره می‌کند
 
       # Step 5: Verify package-lock.json
       - name: Verify package-lock.json
         shell: bash
         run: |
           if [ ! -f "package-lock.json" ]; then
-            echo "Error: package-lock.json not found!"
-            exit 1
+            echo "Error: package-lock.json not found! Generating one..."
+            npm install
+            git diff --quiet package-lock.json || git add package-lock.json && git commit -m "Generate package-lock.json"
           fi
 
       # Step 6: Install dependencies
@@ -93,7 +95,7 @@ jobs:
           dir dist
         env:
           ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES: true
-          DEBUG: electron-builder* # لاگ‌های دقیق‌تر
+          DEBUG: electron-builder*
         timeout-minutes: 10
 
       # Step 10: Verify artifact

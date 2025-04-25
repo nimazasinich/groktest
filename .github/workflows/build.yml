@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '18'  # استفاده از Node.js 18 برای سازگاری بهتر
+  NODE_VERSION: '18'  # استفاده از Node.js 18 برای سازگاری با وابستگی‌ها
   ARTIFACT_NAME: 'speech-to-text-app'
   OUTPUT_FILE: 'SpeechToTextApp.exe'
 
@@ -88,7 +88,7 @@ jobs:
         shell: cmd
         run: |
           echo "Running electron-builder..."
-          npm run make:portable -- --no-sign
+          npm run make:portable
           echo "Listing contents of dist directory after make:"
           dir dist
         env:

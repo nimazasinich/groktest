@@ -47,17 +47,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: package-lock.json # صراحتاً به package-lock.json اشاره می‌کند
+          # فقط در صورت وجود package-lock.json کش را فعال می‌کنیم
+          cache: ${{ hashFiles('package-lock.json') != '' && 'npm' || '' }}
+          cache-dependency-path: package-lock.json
 
-      # Step 5: Verify package-lock.json
-      - name: Verify package-lock.json
+      # Step 5: Generate package-lock.json if missing
+      - name: Generate package-lock.json if missing
         shell: bash
         run: |
           if [ ! -f "package-lock.json" ]; then
-            echo "Error: package-lock.json not found! Generating one..."
+            echo "package-lock.json not found! Generating one..."
             npm install
-            git diff --quiet package-lock.json || git add package-lock.json && git commit -m "Generate package-lock.json"
+            echo "Generated package-lock.json"
+          else
+            echo "package-lock.json already exists"
           fi
 
       # Step 6: Install dependencies

@@ -1,0 +1,51 @@
+name: Build Electron App
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+        
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Build project
+      run: npm run build
+      
+    - name: Create executable
+      run: npm run make:portable
+      
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: speech-to-text-app
+        path: dist/SpeechToTextApp.exe
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: speech-to-text-app
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: SpeechToTextApp.exe
